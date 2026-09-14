@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Banana的岁时漫游</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#061a16;overflow:hidden;font-family:"Noto Serif SC","Songti SC","STSong",serif;color:#eef3e6;}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#061a16}
+  canvas{display:block}
+  #ui{position:fixed;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;}
+  #ui *{pointer-events:none}
+  #chapter{position:absolute;left:34px;top:26px;font-size:15px;letter-spacing:.12em;opacity:.85;text-shadow:0 1px 8px rgba(0,0,0,.45);display:flex;gap:12px;align-items:baseline}
+  #chapter .num{font-size:12px;opacity:.7;letter-spacing:.2em}
+  #chapter .sep{opacity:.35;margin:0 2px}
+  #chapter .season{font-size:12px;opacity:.65}
+  #chapter.pop{animation:pop 1.6s ease-out}
+  @keyframes pop{0%{opacity:0;transform:translateY(6px)}30%{opacity:1;transform:none}}
+  #age{position:absolute;right:36px;top:28px;font-size:12px;letter-spacing:.2em;opacity:.55;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+  #sub{position:absolute;left:0;right:0;bottom:96px;text-align:center;font-size:21px;letter-spacing:.14em;opacity:0;transition:opacity 1.4s ease;text-shadow:0 2px 14px rgba(0,0,0,.55),0 0 2px rgba(0,0,0,.6)}
+  #sub.show{opacity:.95}
+  #hint{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:13px;letter-spacing:.2em;opacity:0;transition:opacity .8s;color:#dbe7d2}
+  #hint.show{opacity:.7}
+  #toast{position:absolute;left:0;right:0;top:120px;text-align:center;font-size:15px;letter-spacing:.16em;opacity:0;transition:opacity 1.2s;color:#f6efcf;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  #toast.show{opacity:.9}
+  #title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,18,14,.42);transition:opacity 1.8s;backdrop-filter:blur(2px)}
+  #title.hidden{opacity:0}
+  #title .t1{font-size:46px;letter-spacing:.32em;text-indent:.32em;font-weight:600;text-shadow:0 4px 30px rgba(0,0,0,.6)}
+  #title .t2{font-size:11px;letter-spacing:.45em;opacity:.6;margin-top:14px}
+  #title .t3{font-size:13px;letter-spacing:.2em;opacity:.75;margin-top:70px;text-align:center;line-height:2.2}
+  #title .t3 span{opacity:.6;animation:blink 2.4s infinite}
+  @keyframes blink{50%{opacity:.15}}
+  #journal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,20,16,.55);transition:opacity .5s}
+  #journal.hidden{opacity:0;visibility:hidden}
+  .paper{width:760px;padding:34px 44px;background:rgba(238,240,226,.94);color:#2c3a30;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .jhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(44,58,48,.25);padding-bottom:12px;margin-bottom:16px}
+  .jhead b{font-size:22px;letter-spacing:.3em;font-weight:600}.jhead span{font-size:12px;letter-spacing:.2em;opacity:.7}
+  .jgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .cell{padding:9px 6px;border-radius:4px;background:rgba(44,58,48,.05);text-align:center;opacity:.38}
+  .cell.on{opacity:1;background:rgba(120,160,110,.2)}
+  .cell i{display:block;font-style:normal;font-size:9px;letter-spacing:.2em;opacity:.6}.cell b{display:block;font-size:17px;font-weight:600;margin:2px 0}.cell s{display:block;text-decoration:none;font-size:10px;opacity:.7;letter-spacing:.1em}
+  .jeggs{margin-top:18px;border-top:1px solid rgba(44,58,48,.25);padding-top:12px;font-size:13px;max-height:150px;overflow:hidden}
+  .eh{letter-spacing:.2em;opacity:.7;font-size:12px;margin-bottom:6px}.egg{line-height:1.9}.egg span{opacity:.6;font-size:11px;margin-left:10px}.egg.dim{opacity:.55}
+  .jfoot{margin-top:14px;font-size:11px;letter-spacing:.2em;opacity:.55;text-align:right}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="ui"><div id="title"><div class="t1">Banana的岁时漫游</div><div class="t2">A YEAR-LONG WALK THROUGH THE FOREST</div><div class="t3"><span>正在长出森林…</span></div></div></div>
+<script src="vendor/pixi.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
