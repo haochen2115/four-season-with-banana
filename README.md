@@ -6,6 +6,8 @@
 
 **▶ 在线试玩 / Play now: https://haochen2115.github.io/four-season-with-banana/**
 
+国内打不开 GitHub 的话：下载单文件离线版 [`dist/Banana的岁时漫游-离线版.html`](https://gitee.com/chenhao_ch/four-season-with-banana/raw/main/dist/Banana%E7%9A%84%E5%B2%81%E6%97%B6%E6%BC%AB%E6%B8%B8-%E7%A6%BB%E7%BA%BF%E7%89%88.html)（约 23 MB，代码与贴图全部内嵌），保存后用 Chrome / Edge / Safari 直接打开即可，不需要联网。代码镜像：https://gitee.com/chenhao_ch/four-season-with-banana
+
 ![四季](docs/seasons.jpg)
 
 这是一个 vibe coding 作品：整个游戏（渲染、世界生成、节气系统、音效）由 Claude Code 写成，植物贴图由图像生成工具生成。
@@ -34,7 +36,7 @@ cd four-season-with-banana
 python3 dev_server.py 8321      # 或双击 开始漫游.command
 ```
 
-然后打开 http://127.0.0.1:8321/ 。纯静态页面，没有构建步骤；PixiJS 7 已放在 `vendor/`。
+然后打开 http://127.0.0.1:8321/ 。纯静态页面，没有构建步骤；PixiJS 7 已放在 `vendor/`。`python3 build_offline.py` 可以重新生成单文件离线版（需要 Node，用 esbuild 打包）。
 
 ## 它是怎么做的 / How it works
 
