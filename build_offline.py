@@ -12,3 +12,4 @@ html=html.replace('<script src="vendor/pixi.min.js"></script>','<script>'+pixi+'
 html=html.replace('<script type="module" src="src/main.js"></script>','<script type="module">'+js+'</script>')
 pathlib.Path('dist').mkdir(exist_ok=True); out=pathlib.Path('dist/Banana的岁时漫游-离线版.html'); out.write_text(html,encoding='utf-8')
 print(out, round(out.stat().st_size/1e6,1),'MB')
+import zipfile; z=out.with_suffix('.zip'); zipfile.ZipFile(z,'w',zipfile.ZIP_DEFLATED,compresslevel=9).write(out,out.name); print(z, round(z.stat().st_size/1e6,1),'MB')

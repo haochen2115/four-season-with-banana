@@ -6,7 +6,7 @@
 
 **▶ 在线试玩 / Play now: https://haochen2115.github.io/four-season-with-banana/**
 
-国内打不开 GitHub 的话：下载单文件离线版 [`dist/Banana的岁时漫游-离线版.html`](https://gitee.com/chenhao_ch/four-season-with-banana/raw/main/dist/Banana%E7%9A%84%E5%B2%81%E6%97%B6%E6%BC%AB%E6%B8%B8-%E7%A6%BB%E7%BA%BF%E7%89%88.html)（约 23 MB，代码与贴图全部内嵌），保存后用 Chrome / Edge / Safari 直接打开即可，不需要联网。代码镜像：https://gitee.com/chenhao_ch/four-season-with-banana
+国内打不开 GitHub 的话：下载离线版 [`Banana的岁时漫游-离线版.zip`](https://gitee.com/chenhao_ch/four-season-with-banana/raw/main/dist/Banana%E7%9A%84%E5%B2%81%E6%97%B6%E6%BC%AB%E6%B8%B8-%E7%A6%BB%E7%BA%BF%E7%89%88.zip)（约 17 MB，解压后是一个 html 文件，代码与贴图全部内嵌），用 Chrome / Edge / Safari 直接打开即可，不需要联网。代码镜像：https://gitee.com/chenhao_ch/four-season-with-banana
 
 ![四季](docs/seasons.jpg)
 
