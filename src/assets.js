@@ -51,7 +51,7 @@ export async function loadStamps(PIXI, defs){
     // pack every frame of every blur level into ONE atlas so a whole sheet costs one texture slot
     const items=[]; for(const bl of (def.blurs||[0])) for(const f of frames){ items.push({bl, cv: bl?blurred(f,bl):f}); }
     const AW=2048; let x=0,y=0,rowH=0; for(const it of items){ if(x+it.cv.width>AW){ x=0; y+=rowH; rowH=0; } it.x=x; it.y=y; x+=it.cv.width+2; rowH=Math.max(rowH,it.cv.height+2); }
-    const AH=Math.min(4096, 1<<Math.ceil(Math.log2(y+rowH)));
+    const AH=Math.min(2048, 1<<Math.ceil(Math.log2(y+rowH)));   // stay within mobile texture limits
     const atlas=document.createElement('canvas'); atlas.width=AW; atlas.height=AH; const ag=atlas.getContext('2d'); for(const it of items) ag.drawImage(it.cv,it.x,it.y);
     const base=PIXI.BaseTexture.from(atlas,{scaleMode:PIXI.SCALE_MODES.LINEAR, mipmap:PIXI.MIPMAP_MODES.ON});
     const levels={}; for(const it of items){ (levels[it.bl]=levels[it.bl]||[]).push(Object.assign(new PIXI.Texture(base,new PIXI.Rectangle(it.x,it.y,it.cv.width,it.cv.height)),{stampScale:(it.bl?0.5:1)*k})); }

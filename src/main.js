@@ -9,13 +9,24 @@ import { UI } from './ui.js';
 import { Audio } from './audio.js';
 import { Eggs } from './eggs.js';
 
+function showFatal(msg){ const el=document.getElementById('title'); if(el){ el.className=''; el.innerHTML='<div class="t1">Banana的岁时漫游</div><div class="t3">'+msg+'</div>'; } }
+(async function boot(){
+let audio=null;
 const W=1280, H=720;
 // let big polylines/polygons (limbs, moss edges) ride the sprite batcher instead of one draw call each
 PIXI.GraphicsGeometry.BATCHABLE_SIZE=6000;
-const app=new PIXI.Application({ width:W, height:H, antialias:true, backgroundColor:0x0a2a22, resolution:Math.min(1.25,window.devicePixelRatio||1), autoDensity:true, powerPreference:'high-performance' });
+let app;
+try { app=new PIXI.Application({ width:W, height:H, antialias:true, backgroundColor:0x0a2a22, resolution:Math.min(1.25,window.devicePixelRatio||1), autoDensity:true, powerPreference:'high-performance' }); }
+catch(e){ showFatal('这台设备暂时打不开森林（不支持 WebGL）。换一台设备或浏览器再来吧。'); return; }
 document.getElementById('stage').appendChild(app.view);
-function fit(){ const s=Math.min(innerWidth/W, innerHeight/H); app.view.style.width=W*s+'px'; app.view.style.height=H*s+'px'; const ui=document.getElementById('ui'); ui.style.transform=`translate(${(innerWidth-W*s)/2}px,${(innerHeight-H*s)/2}px) scale(${s})`; }
+app.view.addEventListener('webglcontextlost',e=>{ e.preventDefault(); app.ticker.stop(); showFatal('画面暂时离开了。请重新打开再试。'); });
+// Landscape stage: on a portrait phone the whole stage (canvas + overlay) is rotated 90° to fill the screen.
+function fit(){ const portrait=innerHeight>innerWidth*1.15; const vw=portrait?innerHeight:innerWidth, vh=portrait?innerWidth:innerHeight; const s=Math.min(vw/W, vh/H); const ui=document.getElementById('ui');
+  app.view.style.width=W*s+'px'; app.view.style.height=H*s+'px'; app.view.style.position='absolute'; app.view.style.left='0'; app.view.style.top='0'; app.view.style.transformOrigin='0 0';
+  if(portrait){ const ox=(innerWidth-H*s)/2, oy=(innerHeight-W*s)/2; app.view.style.transform=`translate(${ox+H*s}px,${oy}px) rotate(90deg)`; ui.style.transform=`translate(${ox+H*s}px,${oy}px) rotate(90deg) scale(${s})`; }
+  else { const ox=(innerWidth-W*s)/2, oy=(innerHeight-H*s)/2; app.view.style.transform=`translate(${ox}px,${oy}px)`; ui.style.transform=`translate(${ox}px,${oy}px) scale(${s})`; } }
 addEventListener('resize',fit); fit();
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ app.ticker.stop(); if(audio&&audio.suspend) audio.suspend(); } else { app.ticker.start(); if(audio&&audio.resume) audio.resume(); } });
 
 const SAVE_KEY='banana-seasons-v1';
 let stored={}; try{ stored=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); }catch(e){ stored={}; }
@@ -80,7 +91,7 @@ const shimmer=[]; for(let i=0;i<26;i++){ const s=new PIXI.Sprite(tex.streak); s.
 world.addChild(L.walk.c);
 const entities=new PIXI.Container(); L.walk.c.addChild(entities);
 world.addChild(L.near.c, L.fore.c);
-const fx=new FX(PIXI,tex); world.addChild(fx.c);
+const fx=new FX(PIXI,tex); fx.density=1; world.addChild(fx.c);
 const night=new PIXI.Sprite(PIXI.Texture.WHITE); night.width=W; night.height=H; night.blendMode=PIXI.BLEND_MODES.MULTIPLY; night.tint=0x1b2f4f; night.alpha=0; world.addChild(night);
 const vignette=new PIXI.Sprite(tex.vignette); vignette.width=W; vignette.height=H; vignette.alpha=0.5; world.addChild(vignette);
 
@@ -90,7 +101,7 @@ const banana=new Banana(PIXI,bananaFrames,tex); const cat=new Cat(PIXI,catFrames
 banana.x=Math.max(120,state.x); banana.y=groundAt(banana.x).y; cat.x=banana.x-64; cat.y=groundAt(cat.x).y;
 entities.addChild(cat.c, banana.c);
 
-const ui=new UI(); ui.q('#title .t3 span').textContent='按任意键，出发'; const audio=new Audio(); const eggs=new Eggs(ui,state,tex,PIXI,L,entities);
+const ui=new UI(); ui.q('#title .t3 span').textContent='按任意键，出发'; audio=new Audio(); const eggs=new Eggs(ui,state,tex,PIXI,L,entities);
 const input={left:false,right:false,run:false,jump:false};
 let started=false, journalOpen=false, journalYear=state.age, autoWalk=false;
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ShiftLeft:'run',ShiftRight:'run'};
@@ -122,8 +133,11 @@ let camX=banana.x-420, camY=groundAt(banana.x).y-BASE_Y, t=0, curTerm=-1, lastCa
 let clim=climateAt(banana.x/TERM_LEN);
 ui.setTerm(Math.floor((banana.x/TERM_LEN)%24), state.age);
 let waterK=0, lastSayT=0;
+let slowFrames=0, quality=1;
 app.ticker.add(()=>{
   const dt=Math.min(0.05, app.ticker.deltaMS/1000); t+=dt;
+  // runtime degradation: if frames stay slow, drop to DPR 1 and thin the weather
+  if(app.ticker.deltaMS>45){ if(++slowFrames>90 && quality>0){ quality=0; slowFrames=0; app.renderer.resolution=1; app.renderer.resize(W,H); fx.density=0.4; } } else slowFrames=Math.max(0,slowFrames-1);
   if(started&&!journalOpen){
     if(autoWalk){ input.right=true; }
     banana.update(dt,input); input.jump=false;
@@ -167,6 +181,5 @@ app.ticker.add(()=>{
 });
 addEventListener('beforeunload',save);
 window.__game={banana,cat,state,L,app,climate:()=>clim,setX:(x)=>{ banana.x=x; banana.y=groundAt(x).y; cat.x=x-64; camX=x-420; camY=groundAt(x).y-BASE_Y; lastCamX=camX; }, start:()=>{ if(!started){ started=true; ui.hideTitle(); } }};
-// dev helpers (used by automated screenshots)
-window.__shot=async(name)=>{ const rt=PIXI.RenderTexture.create({width:W,height:H,resolution:1}); app.renderer.render(app.stage,{renderTexture:rt}); const b64=await app.renderer.extract.base64(rt,'image/png'); rt.destroy(true); await fetch('http://127.0.0.1:8322/shot?name='+name,{method:'POST',body:b64}); return 'sent '+name; };
-window.__sim=(frames,keys={})=>{ let tt=performance.now(); for(const k in keys) dispatchEvent(new KeyboardEvent('keydown',{code:k})); const t0=performance.now(); for(let i=0;i<frames;i++){ tt+=16.67; app.ticker.update(tt); } const ms=(performance.now()-t0)/frames; for(const k in keys) dispatchEvent(new KeyboardEvent('keyup',{code:k})); return {x:banana.x,y:banana.y,msPerFrame:ms}; };
+
+})();

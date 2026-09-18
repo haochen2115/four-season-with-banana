@@ -39,7 +39,12 @@ cd four-season-with-banana
 python3 dev_server.py 8321      # 或双击 开始漫游.command
 ```
 
-然后打开 http://127.0.0.1:8321/ 。纯静态页面，没有构建步骤；PixiJS 7 已放在 `vendor/`。`python3 build_offline.py` 可以重新生成单文件离线版（需要 Node，用 esbuild 打包）。
+然后打开 http://127.0.0.1:8321/ 。纯静态页面，没有构建步骤；PixiJS 7 已放在 `vendor/`。
+
+两个可选的打包脚本（都需要 Node，用 esbuild 打包）：
+
+- `python3 build_offline.py`：单文件离线版（代码与贴图全部内嵌，双击即玩）。
+- `python3 build_xhs.py`：小红书小工具版 `dist/banana-minitool.zip`（`index.html` 在 zip 根目录、经典脚本、ES2017、无外部资源、WebP 贴图，约 1.7 MB），可直接上传到小工具平台。
 
 ## 它是怎么做的 / How it works
 

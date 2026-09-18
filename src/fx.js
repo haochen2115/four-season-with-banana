@@ -23,7 +23,8 @@ export class FX {
   }
   update(dt, clim, camDx, wind){
     this.t+=dt; const t=this.t;
-    const want={ leaf: Math.round(60*clim.leaf*(0.25+clim.gold*1.2)*(clim.twig<0.5?1:0.3)), petal: Math.round(70*clim.blossom), snow: Math.round(160*clim.snow), rain: Math.round(140*clim.rain), fire: Math.round(60*clim.fire), mote: Math.round(28*clim.light) };
+    const q=this.density||1;
+    const want={ leaf: Math.round(60*clim.leaf*(0.25+clim.gold*1.2)*(clim.twig<0.5?1:0.3)), petal: Math.round(70*clim.blossom), snow: Math.round(160*clim.snow), rain: Math.round(140*clim.rain), fire: Math.round(60*clim.fire), mote: Math.round(28*clim.light) }; for(const k in want) want[k]=Math.round(want[k]*q);
     for(const kind in want){
       const pool=this.pools[kind];
       if(pool.length<want[kind] && Math.random()<0.5) this.spawn(kind,clim);
