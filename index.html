@@ -24,6 +24,8 @@
   #sub.show{opacity:.95}
   #hint{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:13px;letter-spacing:.2em;opacity:0;transition:opacity .8s;color:#dbe7d2}
   #hint.show{opacity:.7}
+  #ui.is-touch #hint{bottom:112px}
+  #ui.is-touch #sub{bottom:150px}
   #toast{position:absolute;left:0;right:0;top:120px;text-align:center;font-size:15px;letter-spacing:.16em;opacity:0;transition:opacity 1.2s;color:#f6efcf;text-shadow:0 2px 12px rgba(0,0,0,.5)}
   #toast.show{opacity:.9}
   #title{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,18,14,.55);transition:opacity 1.8s}
@@ -34,6 +36,23 @@
   #title .t3{font-size:13px;letter-spacing:.2em;opacity:.75;margin-top:70px;text-align:center;line-height:2.2}
   #title .t3 span{opacity:.6;animation:blink 2.4s infinite}
   @keyframes blink{50%{opacity:.15}}
+  /* on-screen controls (touch devices only) */
+  #touch{position:absolute;top:0;left:0;right:0;bottom:0}
+  #touch.hidden{display:none}
+  #ui #touch [data-act],#ui #journal [data-act]{pointer-events:auto}
+  .tzone{position:absolute;top:120px;bottom:0;width:38%;display:flex;align-items:flex-end;padding-bottom:110px;color:rgba(238,243,230,.35);font-size:64px;line-height:1}
+  .tzone.left{left:0;justify-content:flex-start;padding-left:34px}.tzone.right{right:0;justify-content:flex-end;padding-right:34px}
+  .tzone i{font-style:normal;opacity:.6;transition:opacity .2s}.tzone.on i{opacity:1}
+  .tbtn{position:absolute;width:64px;height:64px;border-radius:50%;background:rgba(6,26,22,.42);border:1px solid rgba(238,243,230,.35);color:#eef3e6;font-size:16px;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;text-align:center}
+  .tbtn.on{background:rgba(238,243,230,.28)}
+  .tbtn.jump{right:34px;bottom:34px}.tbtn.sit{right:118px;bottom:34px}
+  .tbar{position:absolute;right:34px;top:60px;display:flex}
+  .tbar .tbtn{position:static;width:auto;height:30px;padding:0 12px;border-radius:15px;font-size:12px}
+  .tbar .tbtn+.tbtn{margin-left:8px}
+  .tbtn.active{background:rgba(238,243,230,.3)}
+  #ui .tips{display:none}#ui.is-touch .tips{display:inline}#ui.is-touch .keys{display:none}
+  .jnav{display:none;margin-right:16px;padding:2px 8px;border:1px solid rgba(44,58,48,.35);border-radius:4px}
+  #ui.is-touch .jnav{display:inline-block}
   #journal{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(4,20,16,.55);transition:opacity .5s}
   #journal.hidden{opacity:0;visibility:hidden}
   .paper{width:760px;padding:34px 44px;background:rgba(238,240,226,.94);color:#2c3a30;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.5)}

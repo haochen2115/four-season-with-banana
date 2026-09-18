@@ -105,25 +105,38 @@ const ui=new UI(); ui.q('#title .t3 span').textContent='按任意键，出发'; 
 const input={left:false,right:false,run:false,jump:false};
 let started=false, journalOpen=false, journalYear=state.age, autoWalk=false;
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ShiftLeft:'run',ShiftRight:'run'};
+// one set of actions shared by the keyboard and the on-screen controls
+const actions={
+  begin(){ if(started) return; started=true; ui.hideTitle(); audio.start(); const term=curTerm>=0?curTerm:Math.floor((banana.x/TERM_LEN)%24); ui.say(TERMS[term][3][0],6); },
+  hold(dir,down){ input[dir]=down; if(down){ autoWalk=false; ui.setAuto(false); banana.sitting=false; } },
+  jump(){ if(journalOpen) return; input.jump=true; if(banana.sitting) banana.sitting=false; },
+  sit(){ if(journalOpen||!banana.onGround) return; banana.sitting=!banana.sitting; autoWalk=false; ui.setAuto(false); if(banana.sitting) ui.say(pickLine(),6); },
+  journal(){ journalOpen=!journalOpen; if(journalOpen){ journalYear=state.age; ui.showJournal(state,journalYear); } else ui.hideJournal(); },
+  jprev(){ journalYear=Math.max(0,journalYear-1); ui.showJournal(state,journalYear); },
+  jnext(){ journalYear=Math.min(state.age,journalYear+1); ui.showJournal(state,journalYear); },
+  auto(){ if(journalOpen) return; autoWalk=!autoWalk; banana.sitting=false; ui.setAuto(autoWalk); ui.toast(autoWalk?(ui.touch?'自动漫游 · 按住两侧可接管':'自动漫游 · 按任意方向键接管'):'手动'); },
+  mute(){ state.muted=!state.muted; audio.setMuted(state.muted); ui.setMute(state.muted); ui.toast(state.muted?'声音 · 关':'声音 · 开'); },
+};
+ui.bindTouch(actions); ui.setMute(state.muted);
 addEventListener('keydown',e=>{
-  if(!started){ started=true; ui.hideTitle(); audio.start(); ui.say(TERMS[curTerm][3][0],6); return; }
+  if(!started){ actions.begin(); return; }
   if(e.repeat) return;
-  if(e.code==='KeyJ'||(journalOpen&&e.code==='Escape')){ journalOpen=!journalOpen; if(journalOpen){ journalYear=state.age; ui.showJournal(state,journalYear); } else ui.hideJournal(); return; }
-  if(journalOpen){ if(e.code==='ArrowLeft'){ journalYear=Math.max(0,journalYear-1); ui.showJournal(state,journalYear);} if(e.code==='ArrowRight'){ journalYear=Math.min(state.age,journalYear+1); ui.showJournal(state,journalYear);} return; }
-  if(keymap[e.code]){ input[keymap[e.code]]=true; autoWalk=false; }
-  if(e.code==='Space'){ input.jump=true; if(banana.sitting) banana.sitting=false; }
-  if(e.code==='KeyE'||e.code==='ArrowDown'||e.code==='KeyS'){ if(banana.onGround){ banana.sitting=!banana.sitting; autoWalk=false; if(banana.sitting) ui.say(pickLine(), 6); } }
-  if(e.code==='KeyR'){ autoWalk=!autoWalk; banana.sitting=false; ui.toast(autoWalk?'自动漫游 · 按任意方向键接管':'手动'); }
-  if(e.code==='KeyN'){ state.muted=!state.muted; audio.setMuted(state.muted); ui.toast(state.muted?'声音 · 关':'声音 · 开'); }
+  if(e.code==='KeyJ'||(journalOpen&&e.code==='Escape')){ actions.journal(); return; }
+  if(journalOpen){ if(e.code==='ArrowLeft') actions.jprev(); if(e.code==='ArrowRight') actions.jnext(); return; }
+  if(keymap[e.code]){ actions.hold(keymap[e.code],true); }
+  if(e.code==='Space') actions.jump();
+  if(e.code==='KeyE'||e.code==='ArrowDown'||e.code==='KeyS') actions.sit();
+  if(e.code==='KeyR') actions.auto();
+  if(e.code==='KeyN') actions.mute();
   if(e.code==='F2'){ document.getElementById('ui').style.opacity=document.getElementById('ui').style.opacity==='0'?'1':'0'; }
 });
 addEventListener('keyup',e=>{ if(keymap[e.code]) input[keymap[e.code]]=false; });
 const touches=new Map();
-app.view.addEventListener('pointerdown',e=>{ if(!started){ started=true; ui.hideTitle(); audio.start(); ui.say(TERMS[curTerm][3][0],6); return; } if(journalOpen) return;
-  const fx=e.offsetX/app.view.clientWidth; let zone='mid'; if(fx<0.35) zone='left'; else if(fx>0.65) zone='right';
-  touches.set(e.pointerId,zone); autoWalk=false;
-  if(zone==='mid'){ if(banana.onGround){ banana.sitting=!banana.sitting; if(banana.sitting) ui.say(pickLine(),6); } } else { banana.sitting=false; input[zone]=true; } });
-const endTouch=e=>{ const z=touches.get(e.pointerId); if(z&&z!=='mid') input[z]=false; touches.delete(e.pointerId); };
+app.view.addEventListener('pointerdown',e=>{ if(!started){ actions.begin(); return; } if(journalOpen) return;
+  const fx=e.offsetX/app.view.clientWidth; let zone='mid'; if(fx<0.38) zone='left'; else if(fx>0.62) zone='right';
+  touches.set(e.pointerId,zone);
+  if(zone==='mid'){ actions.sit(); } else { actions.hold(zone,true); } });
+const endTouch=e=>{ const z=touches.get(e.pointerId); if(z&&z!=='mid') actions.hold(z,false); touches.delete(e.pointerId); };
 app.view.addEventListener('pointerup',endTouch); app.view.addEventListener('pointercancel',endTouch); app.view.addEventListener('pointerleave',endTouch);
 
 function pickLine(){ const lines=TERMS[curTerm][3]; return lines[Math.floor(Math.random()*lines.length)]; }
@@ -174,7 +187,7 @@ app.ticker.add(()=>{
   banana.spr.tint=actorTint; cat.spr.tint=actorTint; cat.glow.alpha=0.2+0.06*Math.sin(t*2)+clim.night*0.35;
   // ui + hints
   ui.update(dt);
-  if(started){ if(!journalOpen){ if(banana.sitting) ui.hint(banana.sitT>3?'E 起身，继续走':'坐一会儿'); else if(Math.abs(banana.speed)<5 && t-lastSayT>4) ui.hint(''); else ui.hint(''); } }
+  if(started){ if(!journalOpen){ if(banana.sitting) ui.hint(banana.sitT>3?(ui.touch?'再点一下「坐」，继续走':'E 起身，继续走'):'坐一会儿'); else ui.hint(''); } }
   eggs.update(dt,t,clim,banana,cat,camX,camY);
   audio.update(dt,clim,banana,cat,waterK);
   saveT+=dt; if(saveT>4){ saveT=0; save(); }

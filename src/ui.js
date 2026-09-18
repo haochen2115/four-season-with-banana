@@ -9,9 +9,16 @@ export class UI {
       <div id="sub"></div>
       <div id="hint"></div>
       <div id="toast"></div>
-      <div id="journal" class="hidden"><div class="paper"><div class="jhead"></div><div class="jgrid"></div><div class="jeggs"></div><div class="jfoot">← → 翻年　·　J / Esc 合上</div></div></div>
-      <div id="title" class=""><div class="t1">Banana的岁时漫游</div><div class="t2">A YEAR-LONG WALK THROUGH THE FOREST</div><div class="t3">A / D 慢慢走 · Shift 小跑 · 空格 跳 · E 坐下 · J 手记<br>触屏：按住左右两侧走，点中间坐下<br><span>正在长出森林…</span></div></div>`;
+      <div id="journal" class="hidden"><div class="paper"><div class="jhead"></div><div class="jgrid"></div><div class="jeggs"></div><div class="jfoot"><span class="jnav" data-act="jprev">‹ 上一年</span><span class="jnav" data-act="jnext">下一年 ›</span><span class="keys">← → 翻年　·　J / Esc 合上</span><span class="tips">点空白处合上</span></div></div></div>
+      <div id="touch" class="hidden">
+        <div class="tzone left" data-act="left"><i>‹</i></div><div class="tzone right" data-act="right"><i>›</i></div>
+        <div class="tbtn jump" data-act="jump">跳</div><div class="tbtn sit" data-act="sit">坐</div>
+        <div class="tbar"><div class="tbtn small" data-act="journal">手记</div><div class="tbtn small" data-act="auto">漫游</div><div class="tbtn small" data-act="mute">声音</div></div>
+      </div>
+      <div id="title" class=""><div class="t1">Banana的岁时漫游</div><div class="t2">A YEAR-LONG WALK THROUGH THE FOREST</div><div class="t3"><span class="keys">A / D 慢慢走 · Shift 小跑 · 空格 跳 · E 坐下 · J 手记<br></span><span class="tips">按住画面左右两侧慢慢走 · 右下角可以跳、坐下<br></span><span>正在长出森林…</span></div></div>`;
     this.q=s=>this.root.querySelector(s);
+    this.touch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
+    this.root.classList.toggle('is-touch',this.touch);
     this.subT=0; this.subQueue=[]; this.subCur=null; this.hintT=0; this.lastTerm=-1;
   }
   setTerm(i, age){ const [name,chapter,season]=TERMS[i]; this.q('#chapter .num').textContent=String(i+1).padStart(2,'0')+' / 24'; this.q('#chapter .name').textContent=name+' · '+chapter; this.q('#chapter .season').textContent=SEASON_NAMES[season]; const el=this.q('#chapter'); if(this.lastTerm!==i){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); this.lastTerm=i; } this.q('#age').textContent=age>0?`${age} 岁 · 第 ${age+1} 年`:'第 1 年'; }
@@ -24,7 +31,18 @@ export class UI {
     else if(this.subT>0){ this.subT-=dt; }
     else if(this.subQueue.length){ this.subCur=this.subQueue.shift(); el.textContent=this.subCur.text; el.classList.add('show'); this.subT=this.subCur.dur; }
   }
-  hideTitle(){ this.q('#title').classList.add('hidden'); }
+  hideTitle(){ this.q('#title').classList.add('hidden'); if(this.touch) this.q('#touch').classList.remove('hidden'); }
+  // wire the on-screen controls; `actions` maps names to functions, hold-actions get {name,down}
+  bindTouch(actions){
+    const layer=this.q('#touch'); const held=new Map();
+    const start=e=>{ const el=e.target.closest('[data-act]'); if(!el) return; e.preventDefault(); const a=el.dataset.act; el.classList.add('on');
+      if(a==='left'||a==='right'){ held.set(e.pointerId,{el,a}); actions.hold(a,true); } else { held.set(e.pointerId,{el,a:null}); actions[a]&&actions[a](); } };
+    const end=e=>{ const h=held.get(e.pointerId); if(!h) return; h.el.classList.remove('on'); if(h.a) actions.hold(h.a,false); held.delete(e.pointerId); };
+    layer.addEventListener('pointerdown',start); layer.addEventListener('pointerup',end); layer.addEventListener('pointercancel',end); layer.addEventListener('pointerleave',end);
+    const j=this.q('#journal'); j.addEventListener('pointerdown',e=>{ const el=e.target.closest('[data-act]'); if(el){ e.preventDefault(); actions[el.dataset.act]&&actions[el.dataset.act](); return; } if(!e.target.closest('.paper')) actions.journal(); });
+  }
+  setAuto(on){ const b=this.q('[data-act=auto]'); if(b) b.classList.toggle('active',on); }
+  setMute(on){ const b=this.q('[data-act=mute]'); if(b) b.textContent=on?'静音':'声音'; }
   showJournal(state, year){
     const j=this.q('#journal'); j.classList.remove('hidden');
     const y=year; const seen=state.years[y]?.seen||[]; const eggs=state.eggs||{};
