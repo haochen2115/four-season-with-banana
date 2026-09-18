@@ -108,16 +108,19 @@ const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Shift
 // one set of actions shared by the keyboard and the on-screen controls
 const actions={
   begin(){ if(started) return; started=true; ui.hideTitle(); audio.start(); const term=curTerm>=0?curTerm:Math.floor((banana.x/TERM_LEN)%24); ui.say(TERMS[term][3][0],6); },
-  hold(dir,down){ input[dir]=down; if(down){ autoWalk=false; ui.setAuto(false); banana.sitting=false; } },
+  hold(dir,down){ if(down&&journalOpen) return; input[dir]=down; if(down){ autoWalk=false; ui.setAuto(false); banana.sitting=false; } },
   jump(){ if(journalOpen) return; input.jump=true; if(banana.sitting) banana.sitting=false; },
   sit(){ if(journalOpen||!banana.onGround) return; banana.sitting=!banana.sitting; autoWalk=false; ui.setAuto(false); if(banana.sitting) ui.say(pickLine(),6); },
-  journal(){ journalOpen=!journalOpen; if(journalOpen){ journalYear=state.age; ui.showJournal(state,journalYear); } else ui.hideJournal(); },
+  journal(){ journalOpen=!journalOpen; if(journalOpen){ input.left=false; input.right=false; journalYear=state.age; ui.showJournal(state,journalYear); } else ui.hideJournal(); },
   jprev(){ journalYear=Math.max(0,journalYear-1); ui.showJournal(state,journalYear); },
   jnext(){ journalYear=Math.min(state.age,journalYear+1); ui.showJournal(state,journalYear); },
   auto(){ if(journalOpen) return; autoWalk=!autoWalk; banana.sitting=false; ui.setAuto(autoWalk); ui.toast(autoWalk?(ui.touch?'自动漫游 · 按住两侧可接管':'自动漫游 · 按任意方向键接管'):'手动'); },
   mute(){ state.muted=!state.muted; audio.setMuted(state.muted); ui.setMute(state.muted); ui.toast(state.muted?'声音 · 关':'声音 · 开'); },
 };
-ui.bindTouch(actions); ui.setMute(state.muted);
+ui.bindTouch(actions); ui.setMute(state.muted); audio.muted=!!state.muted;
+// mobile WebViews only let audio start inside a user gesture: retry on every tap/key until it is running
+const unlockAudio=()=>{ if(started) audio.unlock(); };
+for(const ev of ['pointerdown','pointerup','touchend','click','keydown']) document.addEventListener(ev,unlockAudio,true);
 addEventListener('keydown',e=>{
   if(!started){ actions.begin(); return; }
   if(e.repeat) return;
@@ -187,7 +190,8 @@ app.ticker.add(()=>{
   banana.spr.tint=actorTint; cat.spr.tint=actorTint; cat.glow.alpha=0.2+0.06*Math.sin(t*2)+clim.night*0.35;
   // ui + hints
   ui.update(dt);
-  if(started){ if(!journalOpen){ if(banana.sitting) ui.hint(banana.sitT>3?(ui.touch?'再点一下「坐」，继续走':'E 起身，继续走'):'坐一会儿'); else ui.hint(''); } }
+  ui.setSit(banana.sitting);
+  if(started){ if(!journalOpen){ if(banana.sitting) ui.hint(banana.sitT>3?(ui.touch?'点「起」站起来，继续走':'E 起身，继续走'):'坐一会儿'); else ui.hint(''); } }
   eggs.update(dt,t,clim,banana,cat,camX,camY);
   audio.update(dt,clim,banana,cat,waterK);
   saveT+=dt; if(saveT>4){ saveT=0; save(); }

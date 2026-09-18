@@ -9,11 +9,11 @@ export class UI {
       <div id="sub"></div>
       <div id="hint"></div>
       <div id="toast"></div>
-      <div id="journal" class="hidden"><div class="paper"><div class="jhead"></div><div class="jgrid"></div><div class="jeggs"></div><div class="jfoot"><span class="jnav" data-act="jprev">‹ 上一年</span><span class="jnav" data-act="jnext">下一年 ›</span><span class="keys">← → 翻年　·　J / Esc 合上</span><span class="tips">点空白处合上</span></div></div></div>
+      <div id="journal" class="hidden"><div class="paper"><span class="jclose" data-act="journal">✕</span><div class="jhead"></div><div class="jgrid"></div><div class="jeggs"></div><div class="jfoot"><span class="jnav" data-act="jprev">‹ 上一年</span><span class="jnav" data-act="jnext">下一年 ›</span><span class="keys">← → 翻年　·　J / Esc 合上</span><span class="tips">点 ✕ 或空白处合上</span></div></div></div>
       <div id="touch" class="hidden">
         <div class="tzone left" data-act="left"><i>‹</i></div><div class="tzone right" data-act="right"><i>›</i></div>
         <div class="tbtn jump" data-act="jump">跳</div><div class="tbtn sit" data-act="sit">坐</div>
-        <div class="tbar"><div class="tbtn small" data-act="journal">手记</div><div class="tbtn small" data-act="auto">漫游</div><div class="tbtn small" data-act="mute">声音</div></div>
+        <div class="tbar"><div class="tbtn small" data-act="journal">手记</div><div class="tbtn small" data-act="auto">漫游</div><div class="tbtn small icon" data-act="mute">🔊</div></div>
       </div>
       <div id="title" class=""><div class="t1">Banana的岁时漫游</div><div class="t2">A YEAR-LONG WALK THROUGH THE FOREST</div><div class="t3"><span class="keys">A / D 慢慢走 · Shift 小跑 · 空格 跳 · E 坐下 · J 手记<br></span><span class="tips">按住画面左右两侧慢慢走 · 右下角可以跳、坐下<br></span><span>正在长出森林…</span></div></div>`;
     this.q=s=>this.root.querySelector(s);
@@ -39,16 +39,18 @@ export class UI {
       if(a==='left'||a==='right'){ held.set(e.pointerId,{el,a}); actions.hold(a,true); } else { held.set(e.pointerId,{el,a:null}); actions[a]&&actions[a](); } };
     const end=e=>{ const h=held.get(e.pointerId); if(!h) return; h.el.classList.remove('on'); if(h.a) actions.hold(h.a,false); held.delete(e.pointerId); };
     layer.addEventListener('pointerdown',start); layer.addEventListener('pointerup',end); layer.addEventListener('pointercancel',end); layer.addEventListener('pointerleave',end);
-    const j=this.q('#journal'); j.addEventListener('pointerdown',e=>{ const el=e.target.closest('[data-act]'); if(el){ e.preventDefault(); actions[el.dataset.act]&&actions[el.dataset.act](); return; } if(!e.target.closest('.paper')) actions.journal(); });
+    const j=this.q('#journal'); j.addEventListener('pointerdown',e=>{ const el=e.target.closest('[data-act]'); if(el){ e.preventDefault(); actions[el.dataset.act]&&actions[el.dataset.act](); return; } if(!e.target.closest('.paper')){ e.preventDefault(); actions.journal(); } });
   }
   setAuto(on){ const b=this.q('[data-act=auto]'); if(b) b.classList.toggle('active',on); }
-  setMute(on){ const b=this.q('[data-act=mute]'); if(b) b.textContent=on?'静音':'声音'; }
+  setMute(on){ const b=this.q('[data-act=mute]'); if(b) b.textContent=on?'🔇':'🔊'; }
+  setSit(on){ const b=this.q('[data-act=sit]'); if(b&&b.textContent!==(on?'起':'坐')) b.textContent=on?'起':'坐'; }
   showJournal(state, year){
     const j=this.q('#journal'); j.classList.remove('hidden');
+    this.q('#touch').classList.add('hidden');   // walk zones sit above the journal in the DOM: take them away while it is open
     const y=year; const seen=state.years[y]?.seen||[]; const eggs=state.eggs||{};
     this.q('.jhead').innerHTML=`<b>岁时手记</b><span>第 ${y+1} 年${y===state.age?' · 正在经历':' · 已珍藏'}</span>`;
     this.q('.jgrid').innerHTML=TERMS.map((t,i)=>`<div class="cell ${seen.includes(i)?'on':''}"><i>${String(i+1).padStart(2,'0')}</i><b>${t[0]}</b><s>${t[1]}</s></div>`).join('');
     const eggList=Object.entries(eggs); this.q('.jeggs').innerHTML=`<div class="eh">路上遇见的小事 · ${eggList.length}</div>`+(eggList.length?eggList.map(([k,v])=>`<div class="egg">✦ ${v.title}<span>${v.note} · 第 ${v.year+1} 年</span></div>`).join(''):`<div class="egg dim">有些相遇，藏在慢慢走的日子里。</div>`);
   }
-  hideJournal(){ this.q('#journal').classList.add('hidden'); }
+  hideJournal(){ this.q('#journal').classList.add('hidden'); if(this.touch&&this.q('#title').classList.contains('hidden')) this.q('#touch').classList.remove('hidden'); }
 }

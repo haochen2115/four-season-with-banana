@@ -39,7 +39,8 @@
   /* on-screen controls (touch devices only) */
   #touch{position:absolute;top:0;left:0;right:0;bottom:0}
   #touch.hidden{display:none}
-  #ui #touch [data-act],#ui #journal [data-act]{pointer-events:auto}
+  #ui #touch [data-act],#ui #journal,#ui #journal .paper,#ui #journal [data-act]{pointer-events:auto}
+  #ui #journal.hidden,#ui #journal.hidden *{pointer-events:none}
   .tzone{position:absolute;top:120px;bottom:0;width:38%;display:flex;align-items:flex-end;padding-bottom:110px;color:rgba(238,243,230,.35);font-size:64px;line-height:1}
   .tzone.left{left:0;justify-content:flex-start;padding-left:34px}.tzone.right{right:0;justify-content:flex-end;padding-right:34px}
   .tzone i{font-style:normal;opacity:.6;transition:opacity .2s}.tzone.on i{opacity:1}
@@ -48,6 +49,7 @@
   .tbtn.jump{right:34px;bottom:34px}.tbtn.sit{right:118px;bottom:34px}
   .tbar{position:absolute;right:34px;top:60px;display:flex}
   .tbar .tbtn{position:static;width:auto;height:30px;padding:0 12px;border-radius:15px;font-size:12px}
+  .tbar .tbtn.icon{font-size:17px;padding:0 10px;letter-spacing:0}
   .tbar .tbtn+.tbtn{margin-left:8px}
   .tbtn.active{background:rgba(238,243,230,.3)}
   #ui .tips{display:none}#ui.is-touch .tips{display:inline}#ui.is-touch .keys{display:none}
@@ -57,6 +59,9 @@
   #journal.hidden{opacity:0;visibility:hidden}
   .paper{width:760px;padding:34px 44px;background:rgba(238,240,226,.94);color:#2c3a30;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
   .jhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(44,58,48,.25);padding-bottom:12px;margin-bottom:16px}
+  .paper{position:relative}
+  .jclose{position:absolute;right:10px;top:8px;width:36px;height:36px;line-height:36px;text-align:center;font-size:20px;color:#2c3a30;opacity:.6;cursor:pointer}
+  .jhead{padding-right:36px}
   .jhead b{font-size:22px;letter-spacing:.3em;font-weight:600}.jhead span{font-size:12px;letter-spacing:.2em;opacity:.7}
   .jgrid{display:grid;grid-template-columns:repeat(6,1fr);grid-gap:8px}
   .cell{padding:9px 6px;border-radius:4px;background:rgba(44,58,48,.05);text-align:center;opacity:.38}

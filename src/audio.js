@@ -12,8 +12,9 @@ export class Audio {
     this.chord=0; this.setChord([220,277.18,329.63]);
   }
   setChord(f){ if(!this.ctx) return; const now=this.ctx.currentTime; this.voices.forEach((v,i)=>{ v.o.frequency.setTargetAtTime(f[i]*(i===2?0.5:1),now,1.5); }); }
-  suspend(){ if(this.ctx&&this.ctx.state==='running') this.ctx.suspend(); }
-  resume(){ if(this.ctx&&this.ctx.state==='suspended'&&!this.muted) this.ctx.resume(); }
+  unlock(){ if(!this.ctx) this.start(); if(this.ctx&&this.ctx.state!=='running'&&!this.hiddenPause){ const p=this.ctx.resume(); if(p&&p.catch) p.catch(()=>{}); } }
+  suspend(){ this.hiddenPause=true; if(this.ctx&&this.ctx.state==='running') this.ctx.suspend(); }
+  resume(){ this.hiddenPause=false; if(this.ctx&&this.ctx.state!=='running') this.ctx.resume(); }
   setMuted(m){ this.muted=m; if(this.master) this.master.gain.setTargetAtTime(m?0:0.6,this.ctx.currentTime,0.3); }
   chirp(){ const c=this.ctx,o=c.createOscillator(),g=c.createGain(); o.type='sine'; const t=c.currentTime; const f=1800+Math.random()*1600; o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*1.6,t+0.08); o.frequency.exponentialRampToValueAtTime(f*0.9,t+0.18); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.06,t+0.03); g.gain.exponentialRampToValueAtTime(0.0005,t+0.25); o.connect(g); g.connect(this.master); o.start(t); o.stop(t+0.3); }
   step(snow){ const c=this.ctx; const src=c.createBufferSource(); src.buffer=this.wind.src.buffer; const f=c.createBiquadFilter(); f.type=snow?'lowpass':'bandpass'; f.frequency.value=snow?900:2400; const g=c.createGain(); const t=c.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(snow?0.16:0.09,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.09); src.connect(f); f.connect(g); g.connect(this.master); src.start(t,Math.random()*2); src.stop(t+0.12); }
