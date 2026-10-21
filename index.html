@@ -70,6 +70,12 @@
   .jeggs{margin-top:18px;border-top:1px solid rgba(44,58,48,.25);padding-top:12px;font-size:13px;max-height:150px;overflow:hidden}
   .eh{letter-spacing:.2em;opacity:.7;font-size:12px;margin-bottom:6px}.egg{line-height:1.9}.egg span{opacity:.6;font-size:11px;margin-left:10px}.egg.dim{opacity:.55}
   .jfoot{margin-top:14px;font-size:11px;letter-spacing:.2em;opacity:.55;text-align:right}
+  /* link to the 3D edition: a pill on the title screen, then a quiet corner link while walking (desktop only) */
+  #go3d{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:5;padding:7px 18px;border:1px solid rgba(238,243,230,.4);border-radius:18px;background:rgba(6,26,22,.4);color:#eef3e6;font-size:13px;letter-spacing:.2em;text-decoration:none;opacity:.8;transition:opacity .6s,background .3s}
+  #go3d:hover{opacity:1;background:rgba(238,243,230,.18)}
+  body:has(#title.hidden) #go3d{left:24px;bottom:18px;transform:none;padding:0;border:0;background:none;font-size:11px;opacity:.35}
+  body:has(#title.hidden) #go3d:hover{opacity:.85;background:none}
+  @media (hover:none),(pointer:coarse){body:has(#title.hidden) #go3d{display:none}}
 </style>
 </head>
 <body>
@@ -78,5 +84,6 @@
 <script src="vendor/pixi.min.js"></script>
 <script type="module" src="src/main.js"></script>
 <script src="src/devtools.js"></script>
+<a id="go3d" href="3d-play/" title="3D 版需要电脑浏览器，首次加载约 17 MB">试试 3D 版 →</a>
 </body>
 </html>
