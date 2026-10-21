@@ -6,6 +6,8 @@
 
 **▶ 在线试玩 / Play now: https://haochen2115.github.io/four-season-with-banana/**
 
+**▶ 3D 版试玩 / 3D edition (beta): https://haochen2115.github.io/four-season-with-banana/3d-play/**　需要支持 WebGL 2 的电脑浏览器，首次加载约 17 MB。
+
 国内打不开 GitHub 的话，下载离线版（约 17 MB 的 zip，解压后是一个 html 文件，代码与贴图全部内嵌，用 Chrome / Edge / Safari 直接打开即可，不需要联网）：
 
 - Gitee 镜像：https://gitee.com/chenhao_ch/four-season-with-banana （发行版页面下载附件，或登录后在 `dist/` 目录下载）
@@ -76,4 +78,7 @@ assets/sprites/     贴图（说明见其中的 PROVENANCE.md）
 
 ## License
 
-MIT © haochen2115
+2D 版源代码：MIT © haochen2115
+
+`3d-play/` 目录是 3D 版的编译成品，只用于在线试玩，不适用上面的 MIT 协议，保留所有权利。
+The files in `3d-play/` are a compiled build of the 3D edition, provided for playing online only. They are not covered by the MIT license; all rights reserved.

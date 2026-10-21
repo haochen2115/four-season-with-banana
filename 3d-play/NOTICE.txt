@@ -1,0 +1,4 @@
+Banana的岁时漫游 · 3D edition (compiled build)
+© haochen2115. All rights reserved.
+These files are provided for playing online only and are not covered by the repository's MIT license.
+本目录是 3D 版的编译成品，仅供在线试玩，不适用仓库的 MIT 协议，保留所有权利。
